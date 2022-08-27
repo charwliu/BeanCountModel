@@ -47,7 +47,7 @@ public protocol AccountItem {
 ///
 /// If e.g. **Assets:Cash:CAD** and **Assets:Cash:EUR** are `Account`s, **Assets** and **Assets:Cash** would be AccountGroups.
 /// In this case **Assets** would be a `baseGroup`
-public class AccountGroup: AccountItem, Identifiable{
+public class AccountGroup: AccountItem,Identifiable {
     
     /// Last part of the name, for **Assets:Cash:CAD** this would be **CAD**
     public let nameItem: String
@@ -68,6 +68,7 @@ public class AccountGroup: AccountItem, Identifiable{
     ///   - accountType: type
     ///   - baseGroup: if this group is one of the five base `AccountType`s
     public init(nameItem: String, accountType: AccountType, baseGroup: Bool = false) {
+        self.id = UUID()
         self.nameItem = nameItem
         self.accountType = accountType
         self.baseGroup = baseGroup
@@ -79,12 +80,18 @@ public class AccountGroup: AccountItem, Identifiable{
     /// and the sub `AccountGroup`s under this group.
     ///
     /// - Returns: Array sorted by name item of children
-    public func children() -> [AccountItem] {
-        var result = [AccountItem]()
-        result.append(contentsOf: Array(accountGroups.values) as [AccountItem])
-        result.append(contentsOf: Array(accounts.values) as [AccountItem])
-        return result.sorted { $0.nameItem < $1.nameItem }
+//    public func children() -> [AccountItem] {
+//        var result = [AccountItem]()
+//        result.append(contentsOf: Array(accountGroups.values) as [AccountItem])
+//        result.append(contentsOf: Array(accounts.values) as [AccountItem])
+//        return result.sorted { $0.nameItem < $1.nameItem }
+//    }
+    public var children: [AccountGroup]? {
+        get {accountGroups.values.sorted{$0.nameItem < $1.nameItem}}
     }
+    
+    public var id: UUID
+    
 }
 
 /// Class with represents an Account with a name, CommoditySymbol, opening and closing date
@@ -298,4 +305,23 @@ extension Account: Equatable {
         rhs.name == lhs.name && rhs.commoditySymbol == lhs.commoditySymbol && rhs.opening == lhs.opening && rhs.closing == lhs.closing && lhs.metaData == rhs.metaData
     }
 
+}
+
+extension AccountGroup: Equatable {
+    /// Compare the name, commodity and meta data as well as the opening and closing of two Accounts.
+    ///
+    /// This does not compare `Transaction`s as they are not part of Accounts
+    ///
+    /// - Returns: if the accounts are equal
+    public static func == (lhs: AccountGroup, rhs: AccountGroup) -> Bool {
+        rhs.accountType == lhs.accountType && rhs.nameItem == lhs.nameItem && rhs.baseGroup == lhs.baseGroup
+    }
+}
+
+extension AccountGroup: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(nameItem)
+        hasher.combine(accountType)
+        hasher.combine(baseGroup)
+    }
 }

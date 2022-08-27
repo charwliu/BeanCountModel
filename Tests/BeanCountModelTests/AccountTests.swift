@@ -21,6 +21,7 @@ class AccountTests: XCTestCase {
         let lifoAccount = Account(name: TestUtils.cash, bookingMethod: .lifo)
         XCTAssertEqual(lifoAccount.bookingMethod, .lifo)
     }
+    
     func testDescription() {
         var accout = Account(name: TestUtils.cash)
         XCTAssertEqual(String(describing: accout), "")
@@ -463,6 +464,13 @@ class AccountTests: XCTestCase {
         } else {
             XCTFail("\(account) is valid")
         }
+    }
+    
+    func testEqualGroup() {
+        let accgrp1 = AccountGroup(nameItem: "Chequing", accountType: .asset)
+        let accgrp2 = AccountGroup(nameItem: "Chequing", accountType: .asset)
+        
+        XCTAssertEqual(accgrp1, accgrp2)
     }
     
     func testEqualName() {
